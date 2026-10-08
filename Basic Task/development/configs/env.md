@@ -68,3 +68,6 @@
   导致浏览器与命令行均无法访问；WSL 侧已通过改用公共 DNS（223.5.5.5 / 119.29.29.29）绕过。
 - 访问 huggingface.co 使用镜像 https://hf-mirror.com。
 - 到 github.com 的连接速率较低（约 150 KB/s），大体积拉取建议改用源码压缩包或加超时。
+- **端口冲突**：Windows 侧 8080 端口被 Steam 的 `steamwebhelper.exe` 占用，
+  浏览器访问 `localhost:8080` 会指向 Steam 的调试页面而非本服务。
+  本项目服务固定使用 **8888** 端口，详见 `server_baseline.md` 第七节。
