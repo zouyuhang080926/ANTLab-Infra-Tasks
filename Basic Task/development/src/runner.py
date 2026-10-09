@@ -2,21 +2,28 @@
 """
 runner.py —— 固定负载运行器
 
-两种用法：
-    python3 src/runner.py        只拼装、不发送，打印出来核查输入（dry-run）
-    python3 src/runner.py run    真正跑一遍负载，逐条记录到 results/runs/
+用法：
+    python3 src/runner.py                       只拼装不发送，核查输入（dry-run）
+    python3 src/runner.py run                   跑一遍负载（1 轮、并发 1）
+    python3 src/runner.py run 3 1               跑 3 轮、并发 1
+    python3 src/runner.py run 3 4               跑 3 轮、并发 4
+
+指标定义见 configs/metrics.md。
 
 设计原则：
   1. 路径全部由"本文件在哪里"推算，不写死绝对路径；
-  2. 输入与生成参数全部取自 configs/workload.json，程序本身不掺入取值；
-  3. 成功和失败都要落盘，失败不能被后续结果覆盖。
+  2. 输入与生成参数全部取自 configs/workload.json；
+  3. 一律使用流式，才能测到首字延迟（TTFT）；
+  4. 成功与失败都落盘，失败不被覆盖。
 """
 
 import json
 import sys
+import threading
 import time
 import urllib.error
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from pathlib import Path
 
@@ -35,6 +42,7 @@ SERVER_URL = "http://127.0.0.1:8888/v1/chat/completions"
 TIMEOUT_SECONDS = 600
 
 CONFIG = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+WRITE_LOCK = threading.Lock()
 
 
 # ===========================================================================
@@ -114,11 +122,15 @@ def dry_run(only_ids=None):
 
 
 # ===========================================================================
-# 三、发送请求
+# 三、发送请求（流式，测量 TTFT）
 # ===========================================================================
 
 def call_model(messages, max_tokens):
-    """发送一次请求，返回 (服务端返回的字典, 客户端耗时秒数)。"""
+    """流式发送一次请求。
+
+    返回一个字典，含：answer / ttft_seconds / elapsed / usage / timings / finish_reason
+    失败时抛出异常，由调用方记录。
+    """
     generation = CONFIG["generation"]
     body = {
         "model": "local",
@@ -127,6 +139,8 @@ def call_model(messages, max_tokens):
         "temperature": generation["temperature"],
         "top_p": generation["top_p"],
         "seed": generation["seed"],
+        "stream": True,
+        "stream_options": {"include_usage": True},
         "chat_template_kwargs": {"enable_thinking": generation["enable_thinking"]},
     }
 
@@ -137,22 +151,62 @@ def call_model(messages, max_tokens):
     )
 
     started = time.time()
+    ttft = None
+    pieces = []
+    usage = {}
+    timings = None
+    finish_reason = None
+
     with urllib.request.urlopen(request, timeout=TIMEOUT_SECONDS) as response:
-        raw = response.read().decode("utf-8")
+        for raw_line in response:
+            line = raw_line.decode("utf-8").strip()
+            if not line.startswith("data: "):
+                continue                     # 空行、注释行一律跳过
+            payload = line[len("data: "):]
+            if payload == "[DONE]":
+                break
+
+            chunk = json.loads(payload)
+
+            if chunk.get("choices"):
+                choice = chunk["choices"][0]
+                delta = choice.get("delta") or {}
+                text = delta.get("content")
+                if text:
+                    if ttft is None:
+                        ttft = time.time() - started      # 第一个非空内容到达
+                    pieces.append(text)
+                if choice.get("finish_reason"):
+                    finish_reason = choice["finish_reason"]
+
+            if chunk.get("usage"):
+                usage = chunk["usage"]
+            if chunk.get("timings"):
+                timings = chunk["timings"]
+
     elapsed = time.time() - started
 
-    return json.loads(raw), elapsed
+    return {
+        "answer": "".join(pieces),
+        "ttft_seconds": ttft,
+        "elapsed": elapsed,
+        "usage": usage,
+        "timings": timings,
+        "finish_reason": finish_reason,
+    }
 
 
-def run_one_task(task, run_id, round_no, index):
+def run_one_task(task, run_id, round_no, index, concurrency):
     """跑一条任务，返回一条完整记录（成功或失败都返回）。"""
     messages = build_messages(task)
+    started_epoch = time.time()
 
     record = {
         "run_id": run_id,
         "request_id": f"{run_id}-{task['id']}-r{round_no}",
         "round": round_no,
         "seq": index,
+        "concurrency": concurrency,
         "task_id": task["id"],
         "task_title": task["title"],
         "task_type": task["type"],
@@ -165,27 +219,44 @@ def run_one_task(task, run_id, round_no, index):
         "error": None,
         "answer": None,
         "finish_reason": None,
+        "ttft_seconds": None,
+        "client_seconds": None,
+        "tpot_seconds": None,
         "prompt_tokens": None,
         "completion_tokens": None,
         "cached_tokens": None,
-        "client_seconds": None,
         "server_timings": None,
         "started_at": datetime.now().isoformat(timespec="seconds"),
+        "started_epoch": round(started_epoch, 4),
+        "finished_epoch": None,
     }
 
     try:
-        payload, elapsed = call_model(messages, task["max_tokens"])
-        choice = payload["choices"][0]
-        usage = payload.get("usage", {})
+        result = call_model(messages, task["max_tokens"])
+        usage = result["usage"] or {}
+        completion = usage.get("completion_tokens")
 
-        record["status"] = "ok"
-        record["answer"] = choice["message"]["content"]
-        record["finish_reason"] = choice.get("finish_reason")
+        # 完整的流式响应最后一定会带一个 usage 分片。
+        # 收不到它，说明流被中途掐断（例如服务端因容量不足取消了任务），
+        # 这种响应必须单独标记，绝不能混进正常结果里。
+        if not usage:
+            record["status"] = "incomplete"
+            record["error"] = "未收到结束分片（usage 缺失），响应可能被中断"
+        else:
+            record["status"] = "ok"
+
+        record["answer"] = result["answer"]
+        record["finish_reason"] = result["finish_reason"]
+        record["ttft_seconds"] = round(result["ttft_seconds"], 3) if result["ttft_seconds"] else None
+        record["client_seconds"] = round(result["elapsed"], 3)
         record["prompt_tokens"] = usage.get("prompt_tokens")
-        record["completion_tokens"] = usage.get("completion_tokens")
+        record["completion_tokens"] = completion
         record["cached_tokens"] = (usage.get("prompt_tokens_details") or {}).get("cached_tokens")
-        record["client_seconds"] = round(elapsed, 3)
-        record["server_timings"] = payload.get("timings")
+        record["server_timings"] = result["timings"]
+
+        if record["status"] == "ok" and result["ttft_seconds"] and completion and completion > 1:
+            decode = result["elapsed"] - result["ttft_seconds"]
+            record["tpot_seconds"] = round(decode / (completion - 1), 4)
     except urllib.error.HTTPError as exc:
         record["status"] = "http_error"
         record["error"] = exc.read().decode("utf-8", "replace")[:500]
@@ -193,6 +264,7 @@ def run_one_task(task, run_id, round_no, index):
         record["status"] = "failed"
         record["error"] = f"{type(exc).__name__}: {exc}"
 
+    record["finished_epoch"] = round(time.time(), 4)
     return record
 
 
@@ -200,63 +272,119 @@ def run_one_task(task, run_id, round_no, index):
 # 四、跑完整负载
 # ===========================================================================
 
-def run_workload(rounds=1):
+def run_workload(rounds=1, concurrency=1):
     RUNS_DIR.mkdir(parents=True, exist_ok=True)
     run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
     out_path = RUNS_DIR / f"{run_id}.jsonl"
 
     print(f"运行编号：{run_id}")
     print(f"记录文件：{out_path}")
-    print(f"轮次：{rounds}　并发：1")
+    print(f"轮次：{rounds}　并发：{concurrency}　任务数：{len(CONFIG['tasks'])}")
     print("=" * 78)
 
     records = []
+    tasks = CONFIG["tasks"]
+
     with out_path.open("w", encoding="utf-8") as out:
         for round_no in range(1, rounds + 1):
-            for index, task in enumerate(CONFIG["tasks"], start=1):
-                record = run_one_task(task, run_id, round_no, index)
-                out.write(json.dumps(record, ensure_ascii=False) + "\n")
-                out.flush()                       # 立刻落盘，中途出错也不丢
-                records.append(record)
+            jobs = [(i, t) for i, t in enumerate(tasks, start=1)]
 
-                if record["status"] == "ok":
-                    print(f"  [轮{round_no} {index:>2}/10] {task['id']}  "
-                          f"输出 {record['completion_tokens']:>4} token  "
-                          f"{record['client_seconds']:>7.2f} 秒  "
-                          f"{record['finish_reason']}")
-                else:
-                    print(f"  [轮{round_no} {index:>2}/10] {task['id']}  "
-                          f"!! {record['status']}：{str(record['error'])[:80]}")
+            def work(job):
+                index, task = job
+                rec = run_one_task(task, run_id, round_no, index, concurrency)
+                with WRITE_LOCK:                 # 多线程写同一文件，必须加锁
+                    out.write(json.dumps(rec, ensure_ascii=False) + "\n")
+                    out.flush()
+                    records.append(rec)
+                    if rec["status"] == "ok":
+                        print(f"  [轮{round_no} {index:>2}/{len(tasks)}] {task['id']}  "
+                              f"TTFT {rec['ttft_seconds']:>6.2f}s  "
+                              f"总 {rec['client_seconds']:>7.2f}s  "
+                              f"输出 {rec['completion_tokens']:>4} token  "
+                              f"{rec['finish_reason']}")
+                    else:
+                        ttft = rec["ttft_seconds"]
+                        ttft_text = f"{ttft:>6.2f}s" if ttft is not None else "    -- s"
+                        total = rec["client_seconds"]
+                        total_text = f"{total:>7.2f}s" if total is not None else "     -- s"
+                        print(f"  [轮{round_no} {index:>2}/{len(tasks)}] {task['id']}  "
+                              f"TTFT {ttft_text}  总 {total_text}  "
+                              f"!! {rec['status']}：{str(rec['error'])[:60]}")
+                return rec
 
-    print_summary(records, run_id, out_path)
+            with ThreadPoolExecutor(max_workers=concurrency) as pool:
+                list(pool.map(work, jobs))
+
+    print_summary(records, run_id, out_path, rounds, concurrency)
     return records
 
 
-def print_summary(records, run_id, out_path):
+def percentile(values, p):
+    """线性插值的分位数。"""
+    if not values:
+        return None
+    data = sorted(values)
+    k = (len(data) - 1) * p
+    low = int(k)
+    high = min(low + 1, len(data) - 1)
+    if low == high:
+        return data[low]
+    return data[low] + (data[high] - data[low]) * (k - low)
+
+
+def num(value, digits=2):
+    """把可能为 None 的数值格式化成字符串，避免格式化报错。"""
+    return "--" if value is None else f"{value:.{digits}f}"
+
+
+def print_summary(records, run_id, out_path, rounds, concurrency):
     ok = [r for r in records if r["status"] == "ok"]
     failed = [r for r in records if r["status"] != "ok"]
 
     print()
     print("=" * 78)
-    print(f"汇总　运行编号 {run_id}")
+    print(f"汇总　运行编号 {run_id}　轮次 {rounds}　并发 {concurrency}")
     print("-" * 78)
-    print(f"{'任务':<6}{'状态':<10}{'输入token':>10}{'输出token':>11}{'耗时(秒)':>10}{'输出字符':>10}")
-    for r in records:
-        answer_len = len(r["answer"]) if r["answer"] else 0
-        print(f"{r['task_id']:<6}{r['status']:<10}"
-              f"{str(r['prompt_tokens'] or '-'):>10}"
-              f"{str(r['completion_tokens'] or '-'):>11}"
-              f"{str(r['client_seconds'] or '-'):>10}"
-              f"{answer_len:>10}")
+
+    if not ok:
+        print(f"成功 0 / 失败 {len(failed)}")
+        print(f"原始记录：{out_path}")
+        return
+
+    ttfts = [r["ttft_seconds"] for r in ok if r["ttft_seconds"]]
+    totals = [r["client_seconds"] for r in ok]
+    tpots = [r["tpot_seconds"] for r in ok if r["tpot_seconds"]]
+    out_tokens = sum(r["completion_tokens"] or 0 for r in ok)
+    total_seconds = sum(totals)
+
+    # 墙钟时间：从第一个请求发出，到最后一个请求结束的**真实**时间。
+    # 并发场景下必须用它算吞吐；用"各请求耗时之和"会把并发算成负收益。
+    wall_seconds = max(r["finished_epoch"] for r in records) - min(r["started_epoch"] for r in records)
+
+    print(f"成功 {len(ok)} / 失败 {len(failed)}")
+    print(f"TTFT     中位数 {num(percentile(ttfts, 0.5))}s   P95 {num(percentile(ttfts, 0.95))}s"
+          f"   最小 {num(min(ttfts) if ttfts else None)}s   最大 {num(max(ttfts) if ttfts else None)}s")
+    print(f"总耗时   中位数 {num(percentile(totals, 0.5))}s   P95 {num(percentile(totals, 0.95))}s"
+          f"   最小 {num(min(totals) if totals else None)}s   最大 {num(max(totals) if totals else None)}s")
+    print(f"TPOT     中位数 {num(percentile(tpots, 0.5), 4)}s   P95 {num(percentile(tpots, 0.95), 4)}s")
+    print(f"输出     合计 {out_tokens} token")
+    print(f"墙钟时间 {wall_seconds:.1f}s　"
+          f"系统吞吐 {out_tokens / wall_seconds:.1f} token/秒"
+          f"　（参考：各请求耗时之和 {total_seconds:.1f}s）")
+    print()
+    print(f"{'任务':<6}{'次数':>5}{'TTFT中位':>10}{'总耗时中位':>11}{'输出token':>10}{'缓存命中':>9}")
+    for task in CONFIG["tasks"]:
+        rows = [r for r in ok if r["task_id"] == task["id"]]
+        if not rows:
+            continue
+        t = [r["ttft_seconds"] for r in rows if r["ttft_seconds"]]
+        c = [r["client_seconds"] for r in rows]
+        o = [r["completion_tokens"] or 0 for r in rows]
+        k = [r["cached_tokens"] or 0 for r in rows]
+        print(f"{task['id']:<6}{len(rows):>5}{num(percentile(t, 0.5)):>10}"
+              f"{num(percentile(c, 0.5)):>11}{sum(o):>10}{sum(k):>9}")
 
     print("-" * 78)
-    total_sec = sum(r["client_seconds"] or 0 for r in ok)
-    total_out = sum(r["completion_tokens"] or 0 for r in ok)
-    if total_sec:
-        print(f"成功 {len(ok)} / 失败 {len(failed)}　总输出 {total_out} token　"
-              f"总耗时 {total_sec:.1f} 秒　平均 {total_out / total_sec:.1f} token/秒")
-    else:
-        print(f"成功 {len(ok)} / 失败 {len(failed)}　（没有成功记录）")
     print(f"原始记录：{out_path}")
 
 
@@ -265,19 +393,26 @@ def print_summary(records, run_id, out_path):
 # ===========================================================================
 
 def main():
-    mode = sys.argv[1] if len(sys.argv) > 1 else "dry"
+    argv = sys.argv[1:]
+    mode = argv[0] if argv else "dry"
 
     if mode == "dry":
         print_task_list()
         dry_run(["P01", "D01"])
-    elif mode == "run":
-        run_workload(rounds=1)
-    else:
-        print("用法：python3 src/runner.py [run]")
-        print("  不带参数  只拼装不发送（输入核查）")
-        print("  run       真正跑一遍负载")
-        return 1
-    return 0
+        return 0
+
+    if mode == "run":
+        rounds = int(argv[1]) if len(argv) > 1 else 1
+        concurrency = int(argv[2]) if len(argv) > 2 else 1
+        run_workload(rounds=rounds, concurrency=concurrency)
+        return 0
+
+    print("用法：python3 src/runner.py [run [轮次] [并发]]")
+    print("  python3 src/runner.py            只拼装不发送（输入核查）")
+    print("  python3 src/runner.py run        1 轮、并发 1")
+    print("  python3 src/runner.py run 3 1    3 轮、并发 1")
+    print("  python3 src/runner.py run 3 4    3 轮、并发 4")
+    return 1
 
 
 if __name__ == "__main__":
