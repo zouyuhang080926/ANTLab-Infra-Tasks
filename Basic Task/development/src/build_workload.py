@@ -29,15 +29,15 @@ OUT_FILE = DEV_DIR / "configs" / "workload.json"
 # max_tokens 依据任务本身的产出要求确定，见 scenario.md 第四节
 SETTINGS = {
     "P01": {"type": "office",    "mode": "interactive", "file": None,      "max_tokens": 512},
-    "P02": {"type": "office",    "mode": "interactive", "file": None,      "max_tokens": 1024},
-    "P03": {"type": "code",      "mode": "interactive", "file": None,      "max_tokens": 768},
-    "P04": {"type": "code",      "mode": "interactive", "file": None,      "max_tokens": 1024},
-    "D01": {"type": "office",    "mode": "batch",       "file": "办公输入01-项目会议与进度资料.md", "max_tokens": 1536},
+    "P02": {"type": "office",    "mode": "interactive", "file": None,      "max_tokens": 2048},
+    "P03": {"type": "code",      "mode": "interactive", "file": None,      "max_tokens": 1536},
+    "P04": {"type": "code",      "mode": "interactive", "file": None,      "max_tokens": 2048},
+    "D01": {"type": "office",    "mode": "batch",       "file": "办公输入01-项目会议与进度资料.md", "max_tokens": 2048},
     "D02": {"type": "office",    "mode": "batch",       "file": "办公输入01-项目会议与进度资料.md", "max_tokens": 1536},
-    "D03": {"type": "office",    "mode": "interactive", "file": "办公输入02-工作室内部管理制度.md", "max_tokens": 1024},
-    "D04": {"type": "office",    "mode": "batch",       "file": "办公输入02-工作室内部管理制度.md", "max_tokens": 1024},
-    "C01": {"type": "code",      "mode": "batch",       "file": "编程输入03-ticket_stats.py",       "max_tokens": 1024},
-    "C02": {"type": "code",      "mode": "batch",       "file": "编程输入03-ticket_stats.py",       "max_tokens": 2048},
+    "D03": {"type": "office",    "mode": "interactive", "file": "办公输入02-工作室内部管理制度.md", "max_tokens": 1536},
+    "D04": {"type": "office",    "mode": "batch",       "file": "办公输入02-工作室内部管理制度.md", "max_tokens": 1536},
+    "C01": {"type": "code",      "mode": "batch",       "file": "编程输入03-ticket_stats.py",       "max_tokens": 2048},
+    "C02": {"type": "code",      "mode": "batch",       "file": "编程输入03-ticket_stats.py",       "max_tokens": 4096},
 }
 
 # 题包推荐的系统消息，原文照用
@@ -118,8 +118,15 @@ def main() -> int:
         tasks.append(item)
 
     workload = {
-        "workload_version": "v1",
+        "workload_version": "v2",
         "frozen_at": "2026-10-09",
+        "revision_note": (
+            "v1 首轮基线中 P02、P03、P04、C01、C02 五条任务的输出被输出上限截断"
+            "（finish_reason=length），导致输出质量无法检查。v2 提高这五条的输出预算："
+            "P02 1024→2048、P03 768→1536、P04 1024→2048、C01 1024→2048、C02 2048→4096；"
+            "D01 1536→2048、D03/D04 1024→1536 为留出余量。v1 的基线数据保留在 "
+            "results/runs/ 中，不覆盖。"
+        ),
         "description": "8 人工作室场景下的 10 条规定任务，办公 6 : 编程 4",
         "source": {
             "prompt_doc": "Basic Task/提示词与输入文档/测试提示词.md",
