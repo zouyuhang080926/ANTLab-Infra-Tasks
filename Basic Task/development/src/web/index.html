@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>本地推理服务 · 展示界面</title>
+<style>
+  :root {
+    --bg: #f5f6f8; --card: #fff; --line: #e3e6ea; --text: #1f2328;
+    --dim: #6b7280; --ok: #15803d; --bad: #b91c1c; --warn: #a16207;
+    --accent: #1d4ed8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 24px; background: var(--bg); color: var(--text);
+    font: 14px/1.6 "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+  }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  h2 { font-size: 15px; margin: 0 0 12px; color: var(--dim); font-weight: 600; }
+  .sub { color: var(--dim); font-size: 13px; margin-bottom: 20px; }
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 8px;
+    padding: 16px 18px; margin-bottom: 16px;
+  }
+  .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  .badge {
+    display: inline-block; padding: 2px 10px; border-radius: 999px;
+    font-size: 12px; font-weight: 600;
+  }
+  .badge.ok { background: #dcfce7; color: var(--ok); }
+  .badge.bad { background: #fee2e2; color: var(--bad); }
+  .metrics { display: flex; flex-wrap: wrap; gap: 24px; }
+  .metric { min-width: 110px; }
+  .metric .k { color: var(--dim); font-size: 12px; }
+  .metric .v { font-size: 19px; font-weight: 600; }
+  .metric .v small { font-size: 12px; font-weight: 400; color: var(--dim); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+  th { color: var(--dim); font-weight: 600; background: #fafbfc; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  tr.bad td { background: #fef2f2; }
+  select, button {
+    font: inherit; padding: 6px 10px; border: 1px solid var(--line);
+    border-radius: 6px; background: #fff; color: var(--text);
+  }
+  button { cursor: pointer; }
+  button:hover { border-color: var(--accent); color: var(--accent); }
+  .muted { color: var(--dim); }
+  .err { color: var(--bad); font-size: 12px; }
+  pre {
+    background: #f8f9fa; border: 1px solid var(--line); border-radius: 6px;
+    padding: 10px; overflow: auto; max-height: 260px; font-size: 12px;
+    white-space: pre-wrap; word-break: break-word;
+  }
+  details summary { cursor: pointer; color: var(--accent); }
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 900px) { .split { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<h1>本地推理服务 · 展示界面</h1>
+<div class="sub" id="subtitle">加载中……</div>
+
+<!-- ① 服务状态 -->
+<div class="card">
+  <h2>① 服务状态</h2>
+  <div class="row" style="margin-bottom:12px">
+    <span id="health-badge" class="badge bad">检测中</span>
+    <span class="muted" id="health-detail"></span>
+    <button onclick="loadStatus()">刷新</button>
+  </div>
+  <div class="metrics" id="gpu-box"></div>
+  <div id="metrics-box" style="margin-top:12px"></div>
+</div>
+
+<!-- ② 运行列表 -->
+<div class="card">
+  <h2>② 运行列表</h2>
+  <div class="row" style="margin-bottom:12px">
+    <span class="muted">选择一次运行查看详情：</span>
+    <select id="run-select" onchange="loadRun(this.value)"></select>
+  </div>
+  <table>
+    <thead><tr>
+      <th>运行编号</th><th class="num">轮次</th><th class="num">并发</th>
+      <th class="num">成功/总数</th><th class="num">输出token</th>
+      <th class="num">墙钟(秒)</th><th class="num">吞吐(t/s)</th><th class="num">截断</th>
+    </tr></thead>
+    <tbody id="run-table"></tbody>
+  </table>
+</div>
+
+<!-- ③④⑤ 运行详情 -->
+<div class="card">
+  <h2>③④⑤ 运行详情 <span class="muted" id="run-title"></span></h2>
+  <div class="metrics" id="run-metrics"></div>
+</div>
+
+<div class="card">
+  <h2>逐任务汇总</h2>
+  <table>
+    <thead><tr>
+      <th>任务</th><th>类型</th><th class="num">次数</th><th class="num">成功</th>
+      <th class="num">输出上限</th><th class="num">TTFT中位(s)</th>
+      <th class="num">总耗时中位(s)</th><th class="num">输出token</th>
+      <th class="num">缓存命中</th><th>finish</th>
+    </tr></thead>
+    <tbody id="task-table"></tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h2>逐请求记录 <span class="muted" id="req-count"></span></h2>
+  <table>
+    <thead><tr>
+      <th class="num">轮</th><th>任务</th><th>状态</th>
+      <th class="num">TTFT(s)</th><th class="num">总耗时(s)</th>
+      <th class="num">输出token</th><th class="num">缓存命中</th>
+      <th>finish</th><th>模型输出／错误</th>
+    </tr></thead>
+    <tbody id="req-table"></tbody>
+  </table>
+</div>
+
+<!-- ⑥ 基线对比 -->
+<div class="card">
+  <h2>⑥ 基线对比</h2>
+  <div class="row" style="margin-bottom:12px">
+    <select id="cmp-a"></select>
+    <span class="muted">对比</span>
+    <select id="cmp-b"></select>
+    <button onclick="runCompare()">比较</button>
+  </div>
+  <div id="cmp-result"></div>
+</div>
+
+<script>
+const fmt = (v, d = 2, unit = '') =>
+  (v === null || v === undefined) ? '—' : v.toFixed(d) + unit;
+const pct = (a, b) => (b === 0 || b === null) ? '—' : (a / b * 100).toFixed(1) + '%';
+
+// ---------- ① 服务状态 ----------
+async function loadStatus() {
+  const r = await fetch('/api/status').then(r => r.json());
+  const badge = document.getElementById('health-badge');
+  const ok = r.health && r.health.status === 'ok';
+  badge.className = 'badge ' + (ok ? 'ok' : 'bad');
+  badge.textContent = ok ? '推理服务在线' : '推理服务离线';
+  document.getElementById('health-detail').textContent =
+    ok ? `地址 ${r.llama_base}` : '无法连接，请确认 llama-server 已启动';
+
+  const g = r.gpu || {};
+  document.getElementById('gpu-box').innerHTML = g.error
+    ? `<span class="err">显卡信息不可用：${g.error}</span>`
+    : [['显卡', g.name], ['温度', g.temperature_c], ['当前频率', g.clock_mhz],
+       ['功耗', g.power_w], ['显存', `${g.vram_used_mib} / ${g.vram_total_mib}`]]
+      .map(([k, v]) => `<div class="metric"><div class="k">${k}</div><div class="v">${v}</div></div>`)
+      .join('');
+
+  const mt = r.metrics_text || '';
+  document.getElementById('metrics-box').innerHTML = mt
+    ? `<details><summary>服务端原始指标（Prometheus 文本格式，前若干行）</summary><pre>${escapeHtml(mt)}</pre></details>`
+    : '<span class="muted">服务端未开放 /metrics（启动时需加 --metrics）</span>';
+}
+
+// ---------- ② 运行列表 ----------
+let RUNS = [];
+async function loadRuns() {
+  const data = await fetch('/api/runs').then(r => r.json());
+  RUNS = data.runs;
+
+  document.getElementById('run-table').innerHTML = RUNS.map(r => {
+    const s = r.summary;
+    const bad = s.failed > 0 || s.truncated > 0;
+    return `<tr class="${bad ? 'bad' : ''}">
+      <td>${r.run_id}</td>
+      <td class="num">${r.rounds}</td>
+      <td class="num">${r.concurrency}</td>
+      <td class="num">${s.success}/${s.total}</td>
+      <td class="num">${s.output_tokens}</td>
+      <td class="num">${fmt(s.wall_seconds, 1)}</td>
+      <td class="num">${fmt(s.throughput, 1)}</td>
+      <td class="num">${s.truncated || '—'}</td>
+    </tr>`;
+  }).join('');
+
+  const opts = RUNS.map(r =>
+    `<option value="${r.run_id}">${r.run_id}（并发${r.concurrency}，${r.rounds}轮）</option>`).join('');
+  document.getElementById('run-select').innerHTML = opts;
+  document.getElementById('cmp-a').innerHTML = opts;
+  document.getElementById('cmp-b').innerHTML = opts;
+  if (RUNS.length > 1) document.getElementById('cmp-b').selectedIndex = 1;
+
+  if (RUNS.length) {
+    document.getElementById('subtitle').textContent =
+      `共 ${RUNS.length} 次运行记录　最新：${RUNS[0].run_id}`;
+    loadRun(RUNS[0].run_id);
+  }
+}
+
+// ---------- ③④⑤ 运行详情 ----------
+async function loadRun(runId) {
+  if (!runId) return;
+  const d = await fetch('/api/run/' + runId).then(r => r.json());
+  const s = d.summary;
+  document.getElementById('run-title').textContent = `　${runId}（并发 ${d.records[0]?.concurrency ?? 1}）`;
+
+  document.getElementById('run-metrics').innerHTML = [
+    ['成功率', `${s.success}/${s.total}`, s.failed ? `失败 ${s.failed}` : ''],
+    ['TTFT 中位', fmt(s.ttft_median, 2, ' s'), `P95 ${fmt(s.ttft_p95, 2)} s`],
+    ['总耗时中位', fmt(s.total_median, 2, ' s'), `P95 ${fmt(s.total_p95, 2)} s`],
+    ['TPOT 中位', fmt(s.tpot_median, 4, ' s'), ''],
+    ['系统吞吐', fmt(s.throughput, 1, ' t/s'), `墙钟 ${fmt(s.wall_seconds, 1)} s`],
+    ['输出 token', s.output_tokens, ''],
+    ['缓存命中', s.cached_tokens, ''],
+  ].map(([k, v, note]) =>
+    `<div class="metric"><div class="k">${k}</div><div class="v">${v}${note ? ` <small>${note}</small>` : ''}</div></div>`
+  ).join('');
+
+  document.getElementById('task-table').innerHTML = d.per_task.map(t => `
+    <tr>
+      <td>${t.task_id}　<span class="muted">${t.title}</span></td>
+      <td>${t.type}</td>
+      <td class="num">${t.runs}</td>
+      <td class="num">${t.ok}</td>
+      <td class="num">${t.max_tokens}</td>
+      <td class="num">${fmt(t.ttft_median, 2)}</td>
+      <td class="num">${fmt(t.total_median, 2)}</td>
+      <td class="num">${t.out_tokens}</td>
+      <td class="num">${t.cached}</td>
+      <td>${t.finish}</td>
+    </tr>`).join('');
+
+  document.getElementById('req-count').textContent = `　共 ${d.records.length} 条`;
+  document.getElementById('req-table').innerHTML = d.records.map(r => {
+    const ok = r.status === 'ok';
+    const body = ok
+      ? `<details><summary>查看输出（${(r.answer || '').length} 字符）</summary><pre>${escapeHtml(r.answer || '')}</pre></details>`
+      : `<span class="err">${escapeHtml(r.error || r.status)}</span>`;
+    return `<tr class="${ok ? '' : 'bad'}">
+      <td class="num">${r.round}</td>
+      <td>${r.task_id}</td>
+      <td>${ok ? 'ok' : `<span class="err">${r.status}</span>`}</td>
+      <td class="num">${fmt(r.ttft_seconds, 3)}</td>
+      <td class="num">${fmt(r.client_seconds, 2)}</td>
+      <td class="num">${r.completion_tokens ?? '—'}</td>
+      <td class="num">${r.cached_tokens ?? '—'}</td>
+      <td>${r.finish_reason || '—'}</td>
+      <td>${body}</td>
+    </tr>`;
+  }).join('');
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+// ---------- ⑥ 对比 ----------
+async function runCompare() {
+  const a = document.getElementById('cmp-a').value;
+  const b = document.getElementById('cmp-b').value;
+  if (!a || !b) return;
+  const d = await fetch(`/api/compare?a=${a}&b=${b}`).then(r => r.json());
+  const rows = [
+    ['并发数', r => r.concurrency ?? '—'],
+    ['成功/总数', r => `${r.summary.success}/${r.summary.total}`],
+    ['TTFT 中位 (s)', r => fmt(r.summary.ttft_median, 2)],
+    ['TTFT P95 (s)', r => fmt(r.summary.ttft_p95, 2)],
+    ['总耗时中位 (s)', r => fmt(r.summary.total_median, 2)],
+    ['TPOT 中位 (s)', r => fmt(r.summary.tpot_median, 4)],
+    ['墙钟时间 (s)', r => fmt(r.summary.wall_seconds, 1)],
+    ['系统吞吐 (t/s)', r => fmt(r.summary.throughput, 1)],
+    ['输出 token', r => r.summary.output_tokens],
+    ['缓存命中', r => r.summary.cached_tokens],
+    ['截断次数', r => r.summary.truncated],
+  ];
+
+  const nA = d.a.summary.throughput, nB = d.b.summary.throughput;
+  const ratio = (nA && nB) ? (nB / nA) : null;
+  const tA = d.a.summary.ttft_median, tB = d.b.summary.ttft_median;
+  const tratio = (tA && tB) ? (tB / tA) : null;
+
+  document.getElementById('cmp-result').innerHTML = `
+    <div class="metrics" style="margin-bottom:16px">
+      <div class="metric"><div class="k">吞吐变化</div><div class="v">${ratio ? ratio.toFixed(2) + ' ×' : '—'}</div></div>
+      <div class="metric"><div class="k">TTFT 变化</div><div class="v">${tratio ? tratio.toFixed(2) + ' ×' : '—'}</div></div>
+    </div>
+    <table>
+      <thead><tr><th>指标</th><th class="num">${d.a.run_id}</th><th class="num">${d.b.run_id}</th></tr></thead>
+      <tbody>${rows.map(([k, f]) =>
+        `<tr><td>${k}</td><td class="num">${f(d.a)}</td><td class="num">${f(d.b)}</td></tr>`).join('')}</tbody>
+    </table>`;
+}
+
+loadStatus();
+loadRuns();
+setInterval(loadStatus, 15000);
+</script>
+</body>
+</html>
