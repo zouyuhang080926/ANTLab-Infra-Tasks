@@ -1,0 +1,196 @@
+[
+  {
+    "epoch": 1791612609.5271,
+    "request_id": "R01",
+    "policy": "priority_cache",
+    "reason": "交互式优先/期限",
+    "queue_len_before": 3,
+    "warm_sessions": []
+  },
+  {
+    "epoch": 1791612615.4841,
+    "request_id": "R08",
+    "policy": "priority_cache",
+    "reason": "命中热会话",
+    "queue_len_before": 14,
+    "warm_sessions": [
+      "docs-v1-a"
+    ]
+  },
+  {
+    "epoch": 1791612616.4159,
+    "request_id": "R04",
+    "policy": "priority_cache",
+    "reason": "交互式优先/期限",
+    "queue_len_before": 14,
+    "warm_sessions": [
+      "docs-v1-a"
+    ]
+  },
+  {
+    "epoch": 1791612616.8124,
+    "request_id": "R09",
+    "policy": "priority_cache",
+    "reason": "交互式优先/期限",
+    "queue_len_before": 13,
+    "warm_sessions": [
+      "live-a",
+      "docs-v1-a"
+    ]
+  },
+  {
+    "epoch": 1791612617.1762,
+    "request_id": "R05",
+    "policy": "priority_cache",
+    "reason": "交互式优先/期限",
+    "queue_len_before": 12,
+    "warm_sessions": [
+      "live-b",
+      "live-a",
+      "docs-v1-a"
+    ]
+  },
+  {
+    "epoch": 1791612618.3352,
+    "request_id": "R10",
+    "policy": "priority_cache",
+    "reason": "交互式优先/期限",
+    "queue_len_before": 11,
+    "warm_sessions": [
+      "docs-v1-b",
+      "live-b",
+      "live-a",
+      "docs-v1-a"
+    ]
+  },
+  {
+    "epoch": 1791612619.4907,
+    "request_id": "R14",
+    "policy": "priority_cache",
+    "reason": "交互式优先/期限",
+    "queue_len_before": 10,
+    "warm_sessions": [
+      "docs-v2-a",
+      "docs-v1-b",
+      "live-b",
+      "live-a"
+    ]
+  },
+  {
+    "epoch": 1791612620.4537,
+    "request_id": "R06",
+    "policy": "priority_cache",
+    "reason": "交互式优先/期限",
+    "queue_len_before": 9,
+    "warm_sessions": [
+      "docs-v2-b",
+      "docs-v2-a",
+      "docs-v1-b",
+      "live-b"
+    ]
+  },
+  {
+    "epoch": 1791612629.0986,
+    "request_id": "R13",
+    "policy": "priority_cache",
+    "reason": "交互式优先/期限",
+    "queue_len_before": 8,
+    "warm_sessions": [
+      "incident-a",
+      "docs-v2-b",
+      "docs-v2-a",
+      "docs-v1-b"
+    ]
+  },
+  {
+    "epoch": 1791612639.1113,
+    "request_id": "R03",
+    "policy": "priority_cache",
+    "reason": "交互式优先/期限",
+    "queue_len_before": 7,
+    "warm_sessions": [
+      "incident-b",
+      "incident-a",
+      "docs-v2-b",
+      "docs-v2-a"
+    ]
+  },
+  {
+    "epoch": 1791612646.9238,
+    "request_id": "R07",
+    "policy": "priority_cache",
+    "reason": "交互式优先/期限",
+    "queue_len_before": 6,
+    "warm_sessions": [
+      "office-a",
+      "incident-b",
+      "incident-a",
+      "docs-v2-b"
+    ]
+  },
+  {
+    "epoch": 1791612655.6913,
+    "request_id": "R11",
+    "policy": "priority_cache",
+    "reason": "交互式优先/期限",
+    "queue_len_before": 5,
+    "warm_sessions": [
+      "code-b",
+      "office-a",
+      "incident-b",
+      "incident-a"
+    ]
+  },
+  {
+    "epoch": 1791612664.5205,
+    "request_id": "R02",
+    "policy": "priority_cache",
+    "reason": "命中热会话",
+    "queue_len_before": 4,
+    "warm_sessions": [
+      "code-a",
+      "code-b",
+      "office-a",
+      "incident-b"
+    ]
+  },
+  {
+    "epoch": 1791612674.6504,
+    "request_id": "R12",
+    "policy": "priority_cache",
+    "reason": "交互式优先/期限",
+    "queue_len_before": 3,
+    "warm_sessions": [
+      "code-a",
+      "code-b",
+      "office-a",
+      "incident-b"
+    ]
+  },
+  {
+    "epoch": 1791612681.1892,
+    "request_id": "R15",
+    "policy": "priority_cache",
+    "reason": "交互式优先/期限",
+    "queue_len_before": 2,
+    "warm_sessions": [
+      "docs-v1-c",
+      "code-a",
+      "code-b",
+      "office-a"
+    ]
+  },
+  {
+    "epoch": 1791612687.0099,
+    "request_id": "R16",
+    "policy": "priority_cache",
+    "reason": "交互式优先/期限",
+    "queue_len_before": 1,
+    "warm_sessions": [
+      "docs-v1-a",
+      "docs-v1-c",
+      "code-a",
+      "code-b"
+    ]
+  }
+]

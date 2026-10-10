@@ -1,0 +1,173 @@
+[
+  {
+    "policy": "fifo",
+    "round": 1,
+    "run_id": "20261010_135918_r1_fifo",
+    "summary": {
+      "total": 16,
+      "success": 16,
+      "interactive_wait_median": 39.27,
+      "batch_wait_median": 40.142,
+      "interactive_e2e_median": 40.335,
+      "batch_e2e_median": 48.69,
+      "batch_wait_max": 71.892,
+      "deadline_rate": 0.5625,
+      "interactive_deadline_rate": 0.125,
+      "batch_deadline_rate": 1.0,
+      "cached_tokens": 3619,
+      "prompt_tokens": 8098
+    }
+  },
+  {
+    "policy": "fifo",
+    "round": 2,
+    "run_id": "20261010_140048_r2_fifo",
+    "summary": {
+      "total": 16,
+      "success": 16,
+      "interactive_wait_median": 36.391,
+      "batch_wait_median": 37.597,
+      "interactive_e2e_median": 37.12,
+      "batch_e2e_median": 47.767,
+      "batch_wait_max": 69.584,
+      "deadline_rate": 0.5625,
+      "interactive_deadline_rate": 0.125,
+      "batch_deadline_rate": 1.0,
+      "cached_tokens": 3619,
+      "prompt_tokens": 8098
+    }
+  },
+  {
+    "policy": "fifo",
+    "round": 3,
+    "run_id": "20261010_140216_r3_fifo",
+    "summary": {
+      "total": 16,
+      "success": 16,
+      "interactive_wait_median": 36.869,
+      "batch_wait_median": 38.03,
+      "interactive_e2e_median": 37.63,
+      "batch_e2e_median": 46.826,
+      "batch_wait_max": 69.543,
+      "deadline_rate": 0.5625,
+      "interactive_deadline_rate": 0.125,
+      "batch_deadline_rate": 1.0,
+      "cached_tokens": 3619,
+      "prompt_tokens": 8098
+    }
+  },
+  {
+    "policy": "priority",
+    "round": 1,
+    "run_id": "20261010_140343_r1_priority",
+    "summary": {
+      "total": 16,
+      "success": 16,
+      "interactive_wait_median": 7.207,
+      "batch_wait_median": 52.481,
+      "interactive_e2e_median": 8.102,
+      "batch_e2e_median": 58.81,
+      "batch_wait_max": 72.537,
+      "deadline_rate": 1.0,
+      "interactive_deadline_rate": 1.0,
+      "batch_deadline_rate": 1.0,
+      "cached_tokens": 4952,
+      "prompt_tokens": 8098
+    }
+  },
+  {
+    "policy": "priority",
+    "round": 2,
+    "run_id": "20261010_140518_r2_priority",
+    "summary": {
+      "total": 16,
+      "success": 16,
+      "interactive_wait_median": 13.483,
+      "batch_wait_median": 72.291,
+      "interactive_e2e_median": 15.022,
+      "batch_e2e_median": 80.341,
+      "batch_wait_max": 94.039,
+      "deadline_rate": 1.0,
+      "interactive_deadline_rate": 1.0,
+      "batch_deadline_rate": 1.0,
+      "cached_tokens": 4952,
+      "prompt_tokens": 8098
+    }
+  },
+  {
+    "policy": "priority",
+    "round": 3,
+    "run_id": "20261010_140709_r3_priority",
+    "summary": {
+      "total": 16,
+      "success": 16,
+      "interactive_wait_median": 6.455,
+      "batch_wait_median": 51.415,
+      "interactive_e2e_median": 7.309,
+      "batch_e2e_median": 57.694,
+      "batch_wait_max": 71.122,
+      "deadline_rate": 1.0,
+      "interactive_deadline_rate": 1.0,
+      "batch_deadline_rate": 1.0,
+      "cached_tokens": 4952,
+      "prompt_tokens": 8098
+    }
+  },
+  {
+    "policy": "priority_cache",
+    "round": 1,
+    "run_id": "20261010_140838_r1_priority_cache",
+    "summary": {
+      "total": 16,
+      "success": 16,
+      "interactive_wait_median": 6.585,
+      "batch_wait_median": 55.689,
+      "interactive_e2e_median": 7.339,
+      "batch_e2e_median": 64.422,
+      "batch_wait_max": 70.7,
+      "deadline_rate": 1.0,
+      "interactive_deadline_rate": 1.0,
+      "batch_deadline_rate": 1.0,
+      "cached_tokens": 4893,
+      "prompt_tokens": 8098
+    }
+  },
+  {
+    "policy": "priority_cache",
+    "round": 2,
+    "run_id": "20261010_141008_r2_priority_cache",
+    "summary": {
+      "total": 16,
+      "success": 16,
+      "interactive_wait_median": 6.589,
+      "batch_wait_median": 54.994,
+      "interactive_e2e_median": 6.985,
+      "batch_e2e_median": 65.123,
+      "batch_wait_max": 71.482,
+      "deadline_rate": 1.0,
+      "interactive_deadline_rate": 1.0,
+      "batch_deadline_rate": 1.0,
+      "cached_tokens": 4893,
+      "prompt_tokens": 8098
+    }
+  },
+  {
+    "policy": "priority_cache",
+    "round": 3,
+    "run_id": "20261010_141136_r3_priority_cache",
+    "summary": {
+      "total": 16,
+      "success": 16,
+      "interactive_wait_median": 6.899,
+      "batch_wait_median": 56.813,
+      "interactive_e2e_median": 7.244,
+      "batch_e2e_median": 67.585,
+      "batch_wait_max": 75.443,
+      "deadline_rate": 1.0,
+      "interactive_deadline_rate": 1.0,
+      "batch_deadline_rate": 1.0,
+      "cached_tokens": 4893,
+      "prompt_tokens": 8098
+    }
+  }
+]

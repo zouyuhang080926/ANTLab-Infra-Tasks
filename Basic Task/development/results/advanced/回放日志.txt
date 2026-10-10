@@ -1,0 +1,221 @@
+提示词：8 条　请求序列：16 条
+策略：fifo、priority、priority_cache　轮次：3
+====================================================================================
+
+>>> 策略 fifo　第 1 轮
+  [13:59:18.381] restart_begin  开始重启
+  [13:59:18.898] stopped        已终止进程 [408]
+  [13:59:18.899] started        已拉起进程，日志 /root/work/logs/llama_8888.out
+  [13:59:20.404] ready          服务就绪，耗时 1.5 秒
+  [13:59:20.404] restart_end    重启成功，总耗时 2.0 秒
+    R01   batch       等待   0.00s 服务   6.08s 端到端   6.68s  按期
+    R02   batch       等待   6.68s 服务   7.37s 端到端  14.05s  按期
+    R03   batch       等待  14.05s 服务   6.84s 端到端  20.89s  按期
+    R04   interactive 等待  20.59s 服务   0.45s 端到端  21.04s  超期
+    R05   interactive 等待  20.84s 服务   1.22s 端到端  22.06s  超期
+    R06   interactive 等待  21.76s 服务   9.76s 端到端  31.52s  按期
+    R07   batch       等待  31.12s 服务   9.42s 端到端  39.87s  按期
+    R08   interactive 等待  39.27s 服务   1.14s 端到端  40.41s  超期
+    R09   interactive 等待  39.91s 服务   0.42s 端到端  40.34s  超期
+    R10   interactive 等待  39.04s 服务   1.10s 端到端  40.14s  超期
+    R11   batch       等待  40.14s 服务   8.55s 端到端  48.69s  按期
+    R12   batch       等待  48.29s 服务   6.88s 端到端  55.17s  按期
+    R13   interactive 等待  54.57s 服务   9.63s 端到端  65.07s  超期
+    R14   interactive 等待  64.57s 服务   1.12s 端到端  65.69s  超期
+    R15   batch       等待  65.19s 服务   7.70s 端到端  72.89s  按期
+    R16   batch       等待  71.89s 服务   9.29s 端到端  81.18s  按期
+    成功 16/16　按期率 56%　交互等待中位 39.3s　后台等待中位 40.1s　后台最大等待 71.9s　缓存命中 3619
+
+>>> 策略 fifo　第 2 轮
+  [14:00:48.177] restart_begin  开始重启
+  [14:00:48.690] stopped        已终止进程 [555]
+  [14:00:48.691] started        已拉起进程，日志 /root/work/logs/llama_8888.out
+  [14:00:50.194] ready          服务就绪，耗时 1.5 秒
+  [14:00:50.194] restart_end    重启成功，总耗时 2.0 秒
+    R01   batch       等待   0.00s 服务   5.68s 端到端   5.68s  按期
+    R02   batch       等待   5.68s 服务   7.54s 端到端  13.22s  按期
+    R03   batch       等待  13.22s 服务   6.36s 端到端  19.58s  按期
+    R04   interactive 等待  19.28s 服务   0.40s 端到端  19.68s  超期
+    R05   interactive 等待  19.48s 服务   1.07s 端到端  20.55s  超期
+    R06   interactive 等待  20.25s 服务   8.09s 端到端  28.34s  按期
+    R07   batch       等待  27.94s 服务   8.51s 端到端  36.45s  按期
+    R08   interactive 等待  35.84s 服务   1.27s 端到端  37.12s  超期
+    R09   interactive 等待  36.62s 服务   0.47s 端到端  37.09s  超期
+    R10   interactive 等待  36.39s 服务   1.21s 端到端  37.60s  超期
+    R11   batch       等待  37.60s 服务   9.20s 端到端  47.77s  按期
+    R12   batch       等待  47.37s 服务   6.95s 端到端  54.31s  按期
+    R13   interactive 等待  53.71s 服务   9.28s 端到端  62.99s  超期
+    R14   interactive 等待  62.49s 服务   1.08s 端到端  63.57s  超期
+    R15   batch       等待  63.07s 服务   7.51s 端到端  70.58s  按期
+    R16   batch       等待  69.58s 服务   9.37s 端到端  80.04s  按期
+    成功 16/16　按期率 56%　交互等待中位 36.4s　后台等待中位 37.6s　后台最大等待 69.6s　缓存命中 3619
+
+>>> 策略 fifo　第 3 轮
+  [14:02:16.237] restart_begin  开始重启
+  [14:02:16.753] stopped        已终止进程 [627]
+  [14:02:16.753] started        已拉起进程，日志 /root/work/logs/llama_8888.out
+  [14:02:18.258] ready          服务就绪，耗时 1.5 秒
+  [14:02:18.258] restart_end    重启成功，总耗时 2.0 秒
+    R01   batch       等待   0.00s 服务   5.79s 端到端   5.79s  按期
+    R02   batch       等待   5.79s 服务   7.24s 端到端  13.03s  按期
+    R03   batch       等待  13.03s 服务   6.33s 端到端  19.36s  按期
+    R04   interactive 等待  19.06s 服务   0.40s 端到端  19.46s  超期
+    R05   interactive 等待  19.26s 服务   1.07s 端到端  20.33s  超期
+    R06   interactive 等待  20.03s 服务   7.75s 端到端  28.94s  按期
+    R07   batch       等待  28.54s 服务   8.46s 端到端  37.00s  按期
+    R08   interactive 等待  36.40s 服务   1.23s 端到端  37.63s  超期
+    R09   interactive 等待  37.13s 服务   0.44s 端到端  37.57s  超期
+    R10   interactive 等待  36.87s 服务   1.16s 端到端  38.03s  超期
+    R11   batch       等待  38.03s 服务   8.80s 端到端  46.83s  按期
+    R12   batch       等待  46.43s 服务   6.89s 端到端  53.32s  按期
+    R13   interactive 等待  52.72s 服务   9.46s 端到端  63.21s  超期
+    R14   interactive 等待  62.71s 服务   1.10s 端到端  63.81s  超期
+    R15   batch       等待  63.31s 服务   7.23s 端到端  70.54s  按期
+    R16   batch       等待  69.54s 服务   9.63s 端到端  79.18s  按期
+    成功 16/16　按期率 56%　交互等待中位 36.9s　后台等待中位 38.0s　后台最大等待 69.5s　缓存命中 3619
+
+>>> 策略 priority　第 1 轮
+  [14:03:43.435] restart_begin  开始重启
+  [14:03:43.951] stopped        已终止进程 [696]
+  [14:03:43.952] started        已拉起进程，日志 /root/work/logs/llama_8888.out
+  [14:03:45.457] ready          服务就绪，耗时 1.5 秒
+  [14:03:45.457] restart_end    重启成功，总耗时 2.0 秒
+    R01   batch       等待   0.00s 服务   6.07s 端到端   7.24s  按期
+    R04   interactive 等待   6.94s 服务   0.38s 端到端   7.31s  按期
+    R09   interactive 等待   5.31s 服务   0.36s 端到端   5.67s  按期
+    R05   interactive 等待   7.47s 服务   1.04s 端到端   8.51s  按期
+    R08   interactive 等待   7.21s 服务   0.90s 端到端   8.10s  按期
+    R10   interactive 等待   6.90s 服务   1.08s 端到端   7.99s  按期
+    R14   interactive 等待   6.49s 服务   0.96s 端到端   7.45s  按期
+    R06   interactive 等待  11.15s 服务   8.37s 端到端  19.52s  按期
+    R13   interactive 等待  16.32s 服务   8.55s 端到端  24.86s  按期
+    R03   batch       等待  28.86s 服务   8.09s 端到端  36.96s  按期
+    R07   batch       等待  35.76s 服务   9.13s 端到端  46.06s  按期
+    R11   batch       等待  44.26s 服务   8.62s 端到端  52.88s  按期
+    R12   batch       等待  52.48s 服务   6.33s 端到端  58.81s  按期
+    R15   batch       等待  56.04s 服务   5.89s 端到端  61.93s  按期
+    R02   batch       等待  68.10s 服务  10.37s 端到端  79.71s  按期
+    R16   batch       等待  72.54s 服务  12.94s 端到端  85.48s  按期
+    成功 16/16　按期率 100%　交互等待中位 7.2s　后台等待中位 52.5s　后台最大等待 72.5s　缓存命中 4952
+
+>>> 策略 priority　第 2 轮
+  [14:05:18.105] restart_begin  开始重启
+  [14:05:18.620] stopped        已终止进程 [764]
+  [14:05:18.620] started        已拉起进程，日志 /root/work/logs/llama_8888.out
+  [14:05:20.125] ready          服务就绪，耗时 1.5 秒
+  [14:05:20.125] restart_end    重启成功，总耗时 2.0 秒
+    R01   batch       等待   0.00s 服务  11.22s 端到端  12.40s  按期
+    R04   interactive 等待  12.10s 服务   0.53s 端到端  12.63s  按期
+    R09   interactive 等待  10.63s 服务   0.51s 端到端  11.14s  按期
+    R05   interactive 等待  12.94s 服务   1.63s 端到端  14.57s  按期
+    R08   interactive 等待  13.27s 服务   1.41s 端到端  14.68s  按期
+    R10   interactive 等待  13.48s 服务   1.62s 端到端  15.10s  按期
+    R14   interactive 等待  13.60s 服务   1.42s 端到端  15.02s  按期
+    R06   interactive 等待  18.72s 服务  12.27s 端到端  30.99s  按期
+    R13   interactive 等待  27.79s 服务  12.68s 端到端  41.60s  按期
+    R03   batch       等待  45.60s 服务  11.23s 端到端  56.84s  按期
+    R07   batch       等待  55.64s 服务   9.32s 端到端  64.96s  按期
+    R11   batch       等待  63.16s 服务   9.53s 端到端  72.69s  按期
+    R12   batch       等待  72.29s 服务   6.89s 端到端  80.34s  按期
+    R15   batch       等待  78.74s 服务   6.21s 端到端  84.95s  按期
+    R02   batch       等待  89.95s 服务  10.09s 端到端 100.04s  按期
+    R16   batch       等待  94.04s 服务   9.63s 端到端 103.67s  按期
+    成功 16/16　按期率 100%　交互等待中位 13.5s　后台等待中位 72.3s　后台最大等待 94.0s　缓存命中 4952
+
+>>> 策略 priority　第 3 轮
+  [14:07:09.793] restart_begin  开始重启
+  [14:07:10.310] stopped        已终止进程 [833]
+  [14:07:10.310] started        已拉起进程，日志 /root/work/logs/llama_8888.out
+  [14:07:12.987] ready          服务就绪，耗时 1.5 秒
+  [14:07:12.987] restart_end    重启成功，总耗时 2.0 秒
+    R01   batch       等待   0.00s 服务   6.55s 端到端   6.55s  按期
+    R04   interactive 等待   6.25s 服务   0.35s 端到端   6.60s  按期
+    R09   interactive 等待   4.60s 服务   0.34s 端到端   4.94s  按期
+    R05   interactive 等待   6.74s 服务   1.01s 端到端   7.75s  按期
+    R08   interactive 等待   6.46s 服务   0.85s 端到端   7.31s  按期
+    R10   interactive 等待   6.11s 服务   0.96s 端到端   7.07s  按期
+    R14   interactive 等待   5.57s 服务   0.88s 端到端   6.46s  按期
+    R06   interactive 等待  10.16s 服务   8.52s 端到端  18.67s  按期
+    R13   interactive 等待  15.47s 服务   8.69s 端到端  24.16s  按期
+    R03   batch       等待  28.16s 服务   8.22s 端到端  37.54s  按期
+    R07   batch       等待  36.34s 服务   8.67s 端到端  45.01s  按期
+    R11   batch       等待  43.21s 服务   8.61s 端到端  51.81s  按期
+    R12   batch       等待  51.41s 服务   6.28s 端到端  57.69s  按期
+    R15   batch       等待  56.09s 服务   5.96s 端到端  63.27s  按期
+    R02   batch       等待  68.27s 服务   8.85s 端到端  77.12s  按期
+    R16   batch       等待  71.12s 服务   8.87s 端到端  80.00s  按期
+    成功 16/16　按期率 100%　交互等待中位 6.5s　后台等待中位 51.4s　后台最大等待 71.1s　缓存命中 4952
+
+>>> 策略 priority_cache　第 1 轮
+  [14:08:38.986] restart_begin  开始重启
+  [14:08:39.502] stopped        已终止进程 [956]
+  [14:08:39.502] started        已拉起进程，日志 /root/work/logs/llama_8888.out
+  [14:08:41.007] ready          服务就绪，耗时 1.5 秒
+  [14:08:41.007] restart_end    重启成功，总耗时 2.0 秒
+    R01   batch       等待   0.00s 服务   5.97s 端到端   5.97s  按期
+    R08   interactive 等待   4.17s 服务   0.92s 端到端   5.08s  按期
+    R04   interactive 等待   6.58s 服务   0.37s 端到端   6.95s  按期
+    R09   interactive 等待   4.95s 服务   0.35s 端到端   5.30s  按期
+    R05   interactive 等待   7.10s 服务   1.07s 端到端   8.17s  按期
+    R10   interactive 等待   5.67s 服务   1.04s 端到端   6.71s  按期
+    R14   interactive 等待   5.21s 服务   0.94s 端到端   7.34s  按期
+    R06   interactive 等待  11.04s 服务   8.57s 端到端  19.61s  按期
+    R13   interactive 等待  16.41s 服务   8.38s 端到端  24.79s  按期
+    R03   batch       等待  28.79s 服务   7.99s 端到端  36.78s  按期
+    R07   batch       等待  35.58s 服务   8.99s 端到端  45.78s  按期
+    R11   batch       等待  43.98s 服务   8.71s 端到端  52.69s  按期
+    R02   batch       等待  55.69s 服务   8.73s 端到端  64.42s  按期
+    R12   batch       等待  61.02s 服务   6.30s 端到端  67.33s  按期
+    R15   batch       等待  65.72s 服务   5.97s 端到端  71.70s  按期
+    R16   batch       等待  70.70s 服务   9.06s 端到端  81.00s  按期
+    成功 16/16　按期率 100%　交互等待中位 6.6s　后台等待中位 55.7s　后台最大等待 70.7s　缓存命中 4893
+
+>>> 策略 priority_cache　第 2 轮
+  [14:10:08.007] restart_begin  开始重启
+  [14:10:08.523] stopped        已终止进程 [1026]
+  [14:10:08.524] started        已拉起进程，日志 /root/work/logs/llama_8888.out
+  [14:10:09.526] ready          服务就绪，耗时 1.0 秒
+  [14:10:09.526] restart_end    重启成功，总耗时 1.5 秒
+    R01   batch       等待   0.00s 服务   5.96s 端到端   5.96s  按期
+    R08   interactive 等待   4.16s 服务   0.93s 端到端   5.09s  按期
+    R04   interactive 等待   6.59s 服务   0.40s 端到端   6.99s  按期
+    R09   interactive 等待   4.99s 服务   0.36s 端到端   5.35s  按期
+    R05   interactive 等待   7.15s 服务   1.16s 端到端   8.31s  按期
+    R10   interactive 等待   5.81s 服务   1.16s 端到端   6.96s  按期
+    R14   interactive 等待   5.46s 服务   0.96s 端到端   6.43s  按期
+    R06   interactive 等待  10.13s 服务   8.64s 端到端  18.77s  按期
+    R13   interactive 等待  15.57s 服务   8.77s 端到端  25.58s  按期
+    R03   batch       等待  29.58s 服务   7.81s 端到端  37.40s  按期
+    R07   batch       等待  36.20s 服务   8.77s 端到端  44.96s  按期
+    R11   batch       等待  43.16s 服务   8.83s 端到端  51.99s  按期
+    R02   batch       等待  54.99s 服务   8.87s 端到端  65.12s  按期
+    R12   batch       等待  61.72s 服务   6.54s 端到端  68.26s  按期
+    R15   batch       等待  66.66s 服务   5.82s 端到端  72.48s  按期
+    R16   batch       等待  71.48s 服务   9.89s 端到端  81.37s  按期
+    成功 16/16　按期率 100%　交互等待中位 6.6s　后台等待中位 55.0s　后台最大等待 71.5s　缓存命中 4893
+
+>>> 策略 priority_cache　第 3 轮
+  [14:11:36.897] restart_begin  开始重启
+  [14:11:37.413] stopped        已终止进程 [1093]
+  [14:11:37.413] started        已拉起进程，日志 /root/work/logs/llama_8888.out
+  [14:11:40.158] ready          服务就绪，耗时 1.5 秒
+  [14:11:40.158] restart_end    重启成功，总耗时 2.0 秒
+    R01   batch       等待   0.00s 服务   6.33s 端到端   6.33s  按期
+    R08   interactive 等待   4.53s 服务   0.87s 端到端   5.40s  按期
+    R04   interactive 等待   6.90s 服务   0.34s 端到端   7.24s  按期
+    R09   interactive 等待   5.24s 服务   0.32s 端到端   5.57s  按期
+    R05   interactive 等待   7.37s 服务   1.05s 端到端   8.42s  按期
+    R10   interactive 等待   5.92s 服务   1.04s 端到端   6.95s  按期
+    R14   interactive 等待   5.45s 服务   0.97s 端到端   6.42s  按期
+    R06   interactive 等待  10.12s 服务   8.76s 端到端  18.89s  按期
+    R13   interactive 等待  15.69s 服务   8.84s 端到端  24.53s  按期
+    R03   batch       等待  28.53s 服务   8.25s 端到端  38.03s  按期
+    R07   batch       等待  36.83s 服务   8.78s 端到端  45.61s  按期
+    R11   batch       等待  43.81s 服务  10.00s 端到端  53.81s  按期
+    R02   batch       等待  56.81s 服务   9.51s 端到端  67.58s  按期
+    R12   batch       等待  64.19s 服务   7.33s 端到端  71.51s  按期
+    R15   batch       等待  69.91s 服务   6.53s 端到端  76.44s  按期
+    R16   batch       等待  75.44s 服务   9.32s 端到端  84.77s  按期
+    成功 16/16　按期率 100%　交互等待中位 6.9s　后台等待中位 56.8s　后台最大等待 75.4s　缓存命中 4893
+
+汇总：/root/work/antlab-infra/Basic Task/development/results/advanced/summary.json
