@@ -1,0 +1,42 @@
+服务就绪（显卡已热）
+71, 1927 MHz
+
+运行编号：20261010_113336
+  [轮1  1/10] P01  TTFT   0.01s  总    1.31s  输出  163 token  stop
+  [轮1  2/10] P02  TTFT   0.04s  总    9.80s  输出 1147 token  stop
+  [轮1  3/10] P03  TTFT   0.04s  总   12.23s  输出 1304 token  stop
+  [轮1  4/10] P04  TTFT   0.04s  总    9.75s  输出 1032 token  stop
+  [轮1  5/10] D01  TTFT   0.59s  总   10.34s  输出  885 token  stop
+  [轮1  6/10] D02  TTFT   0.04s  总    4.53s  输出  412 token  stop
+  [轮1  7/10] D03  TTFT   0.56s  总   10.44s  输出  803 token  stop
+  [轮1  8/10] D04  TTFT   0.04s  总    7.57s  输出  623 token  stop
+  [轮1  9/10] C01  TTFT   0.58s  总   22.34s  输出 1648 token  stop
+  [轮1 10/10] C02  TTFT   0.11s  总   51.53s  输出 3716 token  stop
+  [轮2  1/10] P01  TTFT   0.05s  总    2.75s  输出  178 token  stop
+  [轮2  2/10] P02  TTFT   0.06s  总   20.32s  输出 1355 token  stop
+  [轮2  3/10] P03  TTFT   0.06s  总   49.05s  输出 3374 token  stop
+  [轮2  4/10] P04  TTFT   0.05s  总   15.90s  输出 1154 token  stop
+  [轮2  5/10] D01  TTFT   0.06s  总   12.46s  输出  887 token  stop
+  [轮2  6/10] D02  TTFT   0.06s  总    6.82s  输出  495 token  stop
+  [轮2  7/10] D03  TTFT   0.06s  总   14.20s  输出 1015 token  stop
+  [轮2  8/10] D04  TTFT   0.06s  总    8.68s  输出  621 token  stop
+  [轮2  9/10] C01  TTFT   0.06s  总   15.98s  输出 1161 token  stop
+  [轮2 10/10] C02  TTFT   0.12s  总   55.58s  输出 4099 token  stop
+  [轮3  1/10] P01  TTFT   0.06s  总    2.78s  输出  178 token  stop
+  [轮3  2/10] P02  TTFT   0.06s  总   19.15s  输出 1391 token  stop
+  [轮3  3/10] P03  TTFT   0.06s  总   46.85s  输出 3374 token  stop
+  [轮3  4/10] P04  TTFT   0.06s  总   16.22s  输出 1154 token  stop
+  [轮3  5/10] D01  TTFT   0.06s  总   12.00s  输出  886 token  stop
+  [轮3  6/10] D02  TTFT   0.06s  总    4.93s  输出  363 token  stop
+  [轮3  7/10] D03  TTFT   0.06s  总    8.35s  输出  616 token  stop
+  [轮3  8/10] D04  TTFT   0.05s  总   16.30s  输出 1168 token  stop
+  [轮3  9/10] C01  TTFT   0.05s  总   16.07s  输出 1171 token  stop
+  [轮3 10/10] C02  TTFT   0.13s  总   37.93s  输出 2641 token  stop
+汇总　运行编号 20261010_113336　轮次 3　并发 1
+成功 30 / 失败 0
+TTFT     中位数 0.06s   P95 0.57s   最小 0.01s   最大 0.59s
+总耗时   中位数 12.34s   P95 50.41s   最小 1.31s   最大 55.58s
+TPOT     中位数 0.0137s   P95 0.0151s
+输出     合计 39014 token
+墙钟时间 508.7s　系统吞吐 76.7 token/秒　（参考：各请求耗时之和 522.1s）
+环境快照：/root/work/antlab-infra/Basic Task/development/results/runs/20261010_113336.env.json

@@ -1,0 +1,56 @@
+[
+  {
+    "config": "A_baseline",
+    "run_id": "20261010_110527",
+    "summary": {
+      "success": 30,
+      "total": 30,
+      "truncated": 0,
+      "ttft_median": 0.056,
+      "ttft_p95": 0.49034999999999995,
+      "total_median": 12.875499999999999,
+      "out_tokens": 39014,
+      "wall": 508.9070999622345,
+      "throughput": 76.6623220680065,
+      "cached": 29793,
+      "prompt": 38685,
+      "cache_rate": 0.7701434664598682
+    }
+  },
+  {
+    "config": "B_flash_attn",
+    "run_id": "20261010_111401",
+    "summary": {
+      "success": 30,
+      "total": 30,
+      "truncated": 0,
+      "ttft_median": 0.058499999999999996,
+      "ttft_p95": 0.5894499999999999,
+      "total_median": 13.07,
+      "out_tokens": 39014,
+      "wall": 532.1796998977661,
+      "throughput": 73.30982374467638,
+      "cached": 29793,
+      "prompt": 38685,
+      "cache_rate": 0.7701434664598682
+    }
+  },
+  {
+    "config": "C_kv_q8",
+    "run_id": "20261010_112300",
+    "summary": {
+      "success": 30,
+      "total": 30,
+      "truncated": 1,
+      "ttft_median": 0.064,
+      "ttft_p95": 0.5966999999999999,
+      "total_median": 14.136,
+      "out_tokens": 39139,
+      "wall": 545.4000999927521,
+      "throughput": 71.76199637755865,
+      "cached": 29793,
+      "prompt": 38685,
+      "cache_rate": 0.7701434664598682
+    }
+  }
+]

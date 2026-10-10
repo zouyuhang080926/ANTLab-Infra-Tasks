@@ -1,0 +1,25 @@
+===== base_8192：-c 8192 =====
+0.00.711.667 I load_tensors:        CUDA0 model buffer size =  2375.91 MiB
+0.01.158.950 I llama_kv_cache:      CUDA0 KV buffer size =  1152.00 MiB
+0.01.305.638 I srv    load_model: initializing, n_slots = 4, n_ctx_slot = 8192, kv_unified = 'true'
+
+===== base_16384：-c 16384 =====
+0.00.791.748 I load_tensors:        CUDA0 model buffer size =  2375.91 MiB
+0.01.222.867 I llama_kv_cache:      CUDA0 KV buffer size =  2304.00 MiB
+0.01.436.185 I srv    load_model: initializing, n_slots = 4, n_ctx_slot = 16384, kv_unified = 'true'
+
+===== q8_16384：-c 16384 -ctk q8_0 -ctv q8_0 =====
+0.00.730.591 I load_tensors:        CUDA0 model buffer size =  2375.91 MiB
+0.01.133.589 I llama_kv_cache:      CUDA0 KV buffer size =  1224.00 MiB
+0.01.315.535 I srv    load_model: initializing, n_slots = 4, n_ctx_slot = 16384, kv_unified = 'true'
+
+===== q8_32768：-c 32768 -ctk q8_0 -ctv q8_0 =====
+0.00.844.061 I load_tensors:        CUDA0 model buffer size =  2375.91 MiB
+0.01.171.481 I llama_kv_cache:      CUDA0 KV buffer size =  2448.00 MiB
+0.01.390.392 I srv    load_model: initializing, n_slots = 4, n_ctx_slot = 32768, kv_unified = 'true'
+
+===== q8_65536：-c 65536 -ctk q8_0 -ctv q8_0 =====
+0.00.747.238 I load_tensors:        CUDA0 model buffer size =  2375.91 MiB
+0.01.199.484 I llama_kv_cache:      CUDA0 KV buffer size =  4896.00 MiB
+0.01.567.565 I srv    load_model: initializing, n_slots = 4, n_ctx_slot = 40960, kv_unified = 'true'
+
