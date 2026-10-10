@@ -1,3 +1,57 @@
+# ANTLab Infra 方向考核提交
+
+## 提交信息
+
+| 项目 | 内容 |
+| --- | --- |
+| **所选方向** | **Infra（大模型推理优化）** |
+| 完成阶段 | 基础阶段 + 进阶阶段 |
+| **最终分支** | `master` |
+| **最终版本标签** | `submission-v1` |
+| 最终 commit SHA | 见标签 `submission-v1` 指向的提交，或收集表中登记的 SHA |
+| 完成日期 | 2026-10-10 |
+
+**定位入口**：本仓库的实际工作在 `Basic Task/development/` 目录下。
+
+| 内容 | 位置 |
+| --- | --- |
+| **整合报告**（基础 + 进阶） | [`Basic Task/development/reports/report.md`](Basic%20Task/development/reports/report.md) |
+| 开发说明与运行入口 | [`Basic Task/development/README.md`](Basic%20Task/development/README.md) |
+| 全部源码 | `Basic Task/development/src/`（仅用 Python 标准库） |
+| 场景、固定负载、指标口径、环境 | `Basic Task/development/configs/` |
+| 全部原始实验记录 | `Basic Task/development/results/` |
+| 报告配图 | `Basic Task/development/reports/figures/` |
+
+### 做了什么
+
+在一台 12GB 显存的笔记本上，用 WSL + llama.cpp 部署 Qwen3-4B 本地推理服务，
+建立可复现的测量方法，完成了：
+
+- **基线**：单并发与四并发各 3 轮（吞吐 76.0 → 156.4 token/秒，首字延迟 0.05 → 0.55 秒）
+- **优化**：KV 量化在同等显存下把容量从 16384 翻倍到 32768 token；
+  实测 Flash Attention 在本机为负优化，未保留
+- **输出质量核查**：条款引用 0 处编造；发现模型"能诊断缺陷但不能修复缺陷"
+- **故障与服务恢复**：运行途中杀进程，覆盖等待中/已发送/失败三类请求路径
+- **进阶题**：实现请求调度模块，优先级调度使期限达成率从 56% 提升到 100%
+- **前端展示**：服务状态、逐请求记录、性能统计、错误记录与基线对比
+
+### 快速开始
+
+```bash
+# 启动推理服务（需 WSL + CUDA，详见 configs/env.md）
+/root/work/llama.cpp/build/bin/llama-server \
+  -m /root/work/models/Qwen3-4B-Q4_K_M.gguf \
+  -ngl 99 -c 16384 --host 0.0.0.0 --port 8888 -cram 0 --metrics
+
+# 启动展示界面，浏览器打开 http://localhost:8000
+cd "Basic Task/development" && python3 src/frontend.py
+```
+
+**未完成的部分**已如实列在报告第 1.2、9.4、12.2 节
+（主要是 KV 量化对输出质量的影响、并发下的调度行为、更高并发未测）。
+
+---
+
 # ANTLab Infra Tasks
 
 ANTLab Infra 方向的开发考核任务。当前包含大模型推理优化的基础任务与进阶任务，围绕 llama.cpp／llama-server 完成系统开发、性能测量和优化验证，并通过 GitHub 提交代码、测试数据和书面报告。
