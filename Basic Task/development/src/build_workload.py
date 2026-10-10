@@ -30,14 +30,14 @@ OUT_FILE = DEV_DIR / "configs" / "workload.json"
 SETTINGS = {
     "P01": {"type": "office",    "mode": "interactive", "file": None,      "max_tokens": 512},
     "P02": {"type": "office",    "mode": "interactive", "file": None,      "max_tokens": 2048},
-    "P03": {"type": "code",      "mode": "interactive", "file": None,      "max_tokens": 1536},
+    "P03": {"type": "code",      "mode": "interactive", "file": None,      "max_tokens": 6144},
     "P04": {"type": "code",      "mode": "interactive", "file": None,      "max_tokens": 2048},
     "D01": {"type": "office",    "mode": "batch",       "file": "办公输入01-项目会议与进度资料.md", "max_tokens": 2048},
     "D02": {"type": "office",    "mode": "batch",       "file": "办公输入01-项目会议与进度资料.md", "max_tokens": 1536},
     "D03": {"type": "office",    "mode": "interactive", "file": "办公输入02-工作室内部管理制度.md", "max_tokens": 1536},
-    "D04": {"type": "office",    "mode": "batch",       "file": "办公输入02-工作室内部管理制度.md", "max_tokens": 1536},
-    "C01": {"type": "code",      "mode": "batch",       "file": "编程输入03-ticket_stats.py",       "max_tokens": 2048},
-    "C02": {"type": "code",      "mode": "batch",       "file": "编程输入03-ticket_stats.py",       "max_tokens": 4096},
+    "D04": {"type": "office",    "mode": "batch",       "file": "办公输入02-工作室内部管理制度.md", "max_tokens": 2048},
+    "C01": {"type": "code",      "mode": "batch",       "file": "编程输入03-ticket_stats.py",       "max_tokens": 3072},
+    "C02": {"type": "code",      "mode": "batch",       "file": "编程输入03-ticket_stats.py",       "max_tokens": 6144},
 }
 
 # 题包推荐的系统消息，原文照用
@@ -118,15 +118,25 @@ def main() -> int:
         tasks.append(item)
 
     workload = {
-        "workload_version": "v2",
+        "workload_version": "v5",
         "frozen_at": "2026-10-09",
         "revision_note": (
-            "v1 首轮基线中 P02、P03、P04、C01、C02 五条任务的输出被输出上限截断"
-            "（finish_reason=length），导致输出质量无法检查。v2 提高这五条的输出预算："
-            "P02 1024→2048、P03 768→1536、P04 1024→2048、C01 1024→2048、C02 2048→4096；"
-            "D01 1536→2048、D03/D04 1024→1536 为留出余量。v1 的基线数据保留在 "
-            "results/runs/ 中，不覆盖。"
+            "v1→v2：首轮基线中 P02、P03、P04、C01、C02 五条被输出上限截断，"
+            "提高预算后仍有残留。v2→v3：对 158 条历史记录做统计，发现 P03 在 16 轮中"
+            "被截断 9 次、C01 被截断 5 次、D04 被截断 1 次（均为 v2 预算下的实测），"
+            "因此再次提高：P03 1536→2560、C01 2048→3072、D04 1536→2048。"
+            "历史数据全部保留在 results/runs/ 中，不覆盖。"
         ),
+        "revision_history": [
+            "v1 2026-10-09 初始冻结，10 条任务",
+            "v2 2026-10-09 修正首批截断（P02/P03/P04/C01/C02 提高预算，D01/D03/D04 留余量）",
+            "v3 2026-10-10 依据 158 条记录统计再次修正截断（P03/C01/D04）",
+            "v4 2026-10-10 v3 实测中 P03 在 2560 下仍截断 2/3 轮、C02 在 4096 下截断 1 轮；"
+            "改为给足余量：P03 2560→4096、C02 4096→6144",
+            "v5 2026-10-10 v4 实测中 P03 输出在 856~4096+ 之间大幅波动，仍有 1/6 轮次截断；"
+            "提高到 6144 覆盖长尾。提高上限本身不增加运行代价（模型写完即停），"
+            "仅影响极端情况下的显存与时间上界。此后不再调整。",
+        ],
         "description": "8 人工作室场景下的 10 条规定任务，办公 6 : 编程 4",
         "source": {
             "prompt_doc": "Basic Task/提示词与输入文档/测试提示词.md",

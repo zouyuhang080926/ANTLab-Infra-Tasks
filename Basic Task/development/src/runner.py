@@ -18,6 +18,7 @@ runner.py —— 固定负载运行器
 """
 
 import json
+import subprocess
 import sys
 import threading
 import time
@@ -43,6 +44,43 @@ TIMEOUT_SECONDS = 600
 
 CONFIG = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
 WRITE_LOCK = threading.Lock()
+
+
+def capture_env():
+    """采集显卡当前状态。
+
+    为什么要采：性能测量必须能说清"当时的环境"。
+    电池供电、未升频、后台占卡都会让结果差出好几倍，
+    事后无法从响应时间反推，只能在测量时留下记录。
+    """
+    query = "temperature.gpu,clocks.current.graphics,clocks.max.graphics,power.draw,utilization.gpu,memory.used"
+    try:
+        out = subprocess.run(
+            ["nvidia-smi", "--query-gpu=" + query, "--format=csv,noheader"],
+            capture_output=True, text=True, timeout=15, check=True).stdout.strip()
+    except Exception as exc:                                  # noqa: BLE001
+        return {"error": f"{type(exc).__name__}: {exc}"}
+
+    keys = ["temperature_c", "clock_mhz", "clock_max_mhz", "power_w", "util_percent", "vram_used_mib"]
+    values = [v.strip() for v in out.split(",")]
+    return dict(zip(keys, values))
+
+
+def warm_up(rounds=2):
+    """预热：先发几条请求丢掉。
+
+    两个作用：让显卡从节能频率升上来（约需 6~8 秒），
+    并让服务端完成算子加载与计算图捕获。
+    """
+    print("预热中（结果丢弃，不计入统计）……")
+    task = CONFIG["tasks"][0]
+    for _ in range(rounds):
+        try:
+            call_model(build_messages(task), 64)
+        except Exception:                                     # noqa: BLE001
+            pass
+    print("预热完成")
+    print()
 
 
 # ===========================================================================
@@ -150,7 +188,9 @@ def call_model(messages, max_tokens):
         headers={"Content-Type": "application/json"},
     )
 
-    started = time.time()
+    # 用单调时钟计时：time.time() 是墙上时钟，会被系统校时（NTP）拉动，
+    # 曾实测出现负的 TTFT（-0.008 秒）。monotonic 只增不减，适合测时间间隔。
+    started = time.monotonic()
     ttft = None
     pieces = []
     usage = {}
@@ -174,7 +214,7 @@ def call_model(messages, max_tokens):
                 text = delta.get("content")
                 if text:
                     if ttft is None:
-                        ttft = time.time() - started      # 第一个非空内容到达
+                        ttft = time.monotonic() - started  # 第一个非空内容到达
                     pieces.append(text)
                 if choice.get("finish_reason"):
                     finish_reason = choice["finish_reason"]
@@ -184,7 +224,7 @@ def call_model(messages, max_tokens):
             if chunk.get("timings"):
                 timings = chunk["timings"]
 
-    elapsed = time.time() - started
+    elapsed = time.monotonic() - started
 
     return {
         "answer": "".join(pieces),
@@ -199,7 +239,7 @@ def call_model(messages, max_tokens):
 def run_one_task(task, run_id, round_no, index, concurrency):
     """跑一条任务，返回一条完整记录（成功或失败都返回）。"""
     messages = build_messages(task)
-    started_epoch = time.time()
+    started_epoch = time.time()      # 这里要的是"绝对时刻"，墙上时钟正合适
 
     record = {
         "run_id": run_id,
@@ -276,10 +316,20 @@ def run_workload(rounds=1, concurrency=1):
     RUNS_DIR.mkdir(parents=True, exist_ok=True)
     run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
     out_path = RUNS_DIR / f"{run_id}.jsonl"
+    env_path = RUNS_DIR / f"{run_id}.env.json"
+
+    env_before = capture_env()
 
     print(f"运行编号：{run_id}")
     print(f"记录文件：{out_path}")
     print(f"轮次：{rounds}　并发：{concurrency}　任务数：{len(CONFIG['tasks'])}")
+    print(f"显卡状态：{env_before.get('clock_mhz', '?')} / {env_before.get('clock_max_mhz', '?')}"
+          f"　{env_before.get('power_w', '?')}　{env_before.get('temperature_c', '?')}")
+    print()
+
+    warm_up()                                     # 先热身，再开始计时
+
+    env_after_warmup = capture_env()
     print("=" * 78)
 
     records = []
@@ -315,7 +365,19 @@ def run_workload(rounds=1, concurrency=1):
             with ThreadPoolExecutor(max_workers=concurrency) as pool:
                 list(pool.map(work, jobs))
 
+    env_after = capture_env()
+    env_path.write_text(json.dumps({
+        "run_id": run_id,
+        "rounds": rounds,
+        "concurrency": concurrency,
+        "gpu_before": env_before,
+        "gpu_after_warmup": env_after_warmup,
+        "gpu_after_run": env_after,
+        "note": "电池供电或未升频会显著降低速度；本文件用于说明测量时的环境状态。",
+    }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
     print_summary(records, run_id, out_path, rounds, concurrency)
+    print(f"环境快照：{env_path}")
     return records
 
 
